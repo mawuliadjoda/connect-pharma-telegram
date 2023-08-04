@@ -2,12 +2,12 @@ require('dotenv').config()
 const { Telegraf, Markup } = require('telegraf');
 const { message } = require('telegraf/filters');
 
-const { PORT, TELEGRAM_TOKEN, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT } = process.env
+const { PORT, TELEGRAM_TOKEN, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK } = process.env
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
-const web_link = "https://connect-pharma-911ea.web.app/nearestPharmacies/6,2469878/1,1449074";
+
+
+
 const bot = new Telegraf(TELEGRAM_TOKEN);
-
-
 
 bot.start((ctx) => ctx.reply('Welcome !!!!!! '));
 bot.command('oldschool', (ctx) => ctx.reply('Hello'));
@@ -29,11 +29,19 @@ bot.command("location", ctx => {
 bot.on(message("location"), ctx => {
 	const { latitude, longitude } = ctx.message.location
 
-	console.log({ latitude, longitude })
-    
+	  console.log({ latitude, longitude });
+    const latitudeFr = convertToFRecimal(latitude);
+    const longitudeFr = convertToFRecimal(longitude);
+
+    console.log({ latitudeFr, longitudeFr })
+    console.log(`${WEB_LINK}/${latitudeFr}/${longitudeFr}`);
+
     ctx.reply("Welcome :)))))", {
         reply_markup: {
-          keyboard: [[{ text: "Clicker ici pour ouvrir web app Telegram", web_app: { url: web_link } }]],
+          keyboard: [[{
+             text: "Clicker ici pour ouvrir web app Telegram", 
+             web_app: { url: `${WEB_LINK}/${latitudeFr}/${longitudeFr}` } 
+            }]],
         },
     })
 })
@@ -66,3 +74,14 @@ bot.launch({
 
 
 // https://www.npmjs.com/package/telegraf
+
+
+
+function convertToFRecimal(value) {
+  const valueString = String(value);
+  if (!valueString?.includes(".")) return valueString;
+  const latTab = valueString?.split(".");
+  const decimalPart = latTab ? latTab[0] : 0;
+  const floatingPart = latTab ? latTab[1] : 0;
+  return `${decimalPart},${floatingPart}`;
+}
