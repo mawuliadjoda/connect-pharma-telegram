@@ -24,6 +24,9 @@
 https://devcenter.heroku.com/articles/git
 https://devcenter.heroku.com/articles/deploying-nodejs#build-your-app-and-run-it-locally
 
+   1:  heroku git:remote -a connect-pharma-telegram
+   2:  git push heroku master
+
 
  # error encountered
  https://stackoverflow.com/questions/41788740/enotfound-getaddrinfo-enotfound-api-heroku-com-api-heroku-com443-error-for-her
