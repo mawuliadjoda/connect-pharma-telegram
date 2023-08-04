@@ -9,7 +9,11 @@ const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 
 const bot = new Telegraf(TELEGRAM_TOKEN);
 
-bot.start((ctx) => ctx.reply('Welcome !!!!!! '));
+bot.start((ctx) => {
+  ctx.reply('Bienvenue ! \n Connect Pharma \n');
+  ctx.reply('Choisir une option');
+});
+
 bot.command('oldschool', (ctx) => ctx.reply('Hello'));
 bot.command('hipster', Telegraf.reply('λ'));
 
