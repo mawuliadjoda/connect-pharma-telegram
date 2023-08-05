@@ -1,25 +1,9 @@
-/*
-import express from 'express';
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-  res.send('Hello World!! Bienvenue Mawuli');
-});
-
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
-});
-*/
-// https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
-
-
-
 require('dotenv').config()
-// import express from 'express';
 
-const { Telegraf, Markup } = require('telegraf');
-const { message } = require('telegraf/filters');
+import { Context, session, Telegraf, Markup } from "telegraf";
+import { message } from 'telegraf/filters';
+import { convertToFRecimal } from "./Util";
+
 
 const { PORT,
     TELEGRAM_TOKEN_PROD,
@@ -30,38 +14,58 @@ const { PORT,
     WEB_LINK_NEAREST_PHARMACIES,
     WEB_LINK_REGISTER_PHARMACy
 } = process.env
-
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV! : TELEGRAM_TOKEN_PROD!;
 
 const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches, veuillez envoyer votre localisation";
 const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer une pharmacie, veuillez envoyer votre localisation";
 
+const NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
+const REGISTER_PHARMACY = 'REGISTER_PHARMACY';
 
+interface SessionData {
+    messageCount: number;
+    choice: string;
+    // ... more session data go here
+}
 
+// Define your own context type
+interface MyContext extends Context {
+    session?: SessionData;
+    // ... more props go here
+}
 
+if (TELEGRAM_TOKEN === undefined) {
+    throw new TypeError("BOT_TOKEN must be provided!");
+}
+
+// Create your bot and tell it about your context type
+const bot = new Telegraf<MyContext>(TELEGRAM_TOKEN);
+
+// Make session data available
+bot.use(session());
+
+// Register middleware
 /*
-const app = express();
-const port = 3000;
-app.get('/', (req, res) => {
-    res.send('Hello World!! Bienvenue Mawuli');
-});
-app.listen(port, () => {
-    return console.log(`Express is listening at http://localhost:${port}`);
+bot.on("message", async ctx => {
+    // set a default value
+    ctx.session ??= { messageCount: 0 };
+    ctx.session.messageCount++;
+    await ctx.reply(`Seen ${ctx.session.messageCount} messages.`);
 });
 */
-
-const bot = new Telegraf(TELEGRAM_TOKEN);
-
 bot.start((ctx) => {
-
+    ctx.session = { messageCount: 0, choice: '' };
+    ctx.session.messageCount++;
+    console.log(`context value: ${ctx.session.messageCount}`);
     ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
     ctx.reply(`1: /Pharmacies_Proches \n  \n 2: /Enregistrer_Pharmacie \n`);
 
 });
 
 bot.command("Pharmacies_Proches", ctx => {
-    // session.set
+    ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
+    console.log(`context value: ${ctx.session}`);
     return ctx.reply(
         MESSAGE_SHOW_NEAREST_PHARMACIES,
         Markup.keyboard([
@@ -74,7 +78,8 @@ bot.command("Pharmacies_Proches", ctx => {
 })
 
 bot.command("Enregistrer_Pharmacie", ctx => {
-    // ctx.session.walletData = 'Enregistrer_Pharmacie';
+    ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
+    console.log(`context value: ${ctx.session}`);
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
         Markup.keyboard([
@@ -86,57 +91,40 @@ bot.command("Enregistrer_Pharmacie", ctx => {
     )
 })
 
-bot.command('oldschool', (ctx) => ctx.reply('Hello'));
-bot.command('hipster', Telegraf.reply('λ'));
-
-
-bot.command("location", ctx => {
-    return ctx.reply(
-        "Please share your location",
-        Markup.keyboard([
-            Markup.button.locationRequest("Share location"),
-        ])
-            .oneTime()
-            .resize()
-        ,
-    )
-})
 
 bot.on(message("location"), ctx => {
-    console.log(ctx);
-    /*
-    const reply_msg = ctx.message.reply_to_message?.message_id
-    const reply_to_message = (ctx.update.message && ctx.update.message?.reply_to_message) ? ctx.update.message?.reply_to_message : "";
-      const { latitude, longitude } = ctx.message.location
-  
-        console.log({ latitude, longitude });
-      const latitudeFr = convertToFRecimal(latitude);
-      const longitudeFr = convertToFRecimal(longitude);
-  
-      console.log({ latitudeFr, longitudeFr })
-      console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
-  
-      if(reply_to_message.valueOf() === MESSAGE_SHOW_NEAREST_PHARMACIES) {
+    console.log(ctx.session);
+
+
+    const { latitude, longitude } = ctx.message.location
+
+    console.log({ latitude, longitude });
+    const latitudeFr = convertToFRecimal(latitude);
+    const longitudeFr = convertToFRecimal(longitude);
+
+    console.log({ latitudeFr, longitudeFr })
+    console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
+
+    if (ctx.session.choice === NEAREST_PHARMACIES) {
         ctx.reply("Welcome :)))))", {
             reply_markup: {
-              keyboard: [[{
-                 text: "Clicker ici pour ouvrir web app Telegram", 
-                 web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` } 
+                keyboard: [[{
+                    text: "Clicker ici pour ouvrir web app Telegram",
+                    web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` }
                 }]],
             },
         })
-      } else if (reply_to_message.valueOf() === MESSAGE_REGISTER_PHARMACY){
-          console.log("process register new pharmacy")
-          ctx.reply("Welcome :)))))", {
+    } else if (ctx.session.choice === REGISTER_PHARMACY) {
+        console.log("process register new pharmacy")
+        ctx.reply("Welcome :)))))", {
             reply_markup: {
-              keyboard: [[{
-                 text: "Clicker ici pour ouvrir web app Telegram", 
-                 web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` } 
+                keyboard: [[{
+                    text: "Clicker ici pour ouvrir web app Telegram",
+                    web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` }
                 }]],
             },
         })
-      }
-      */
+    }
 })
 
 bot.on(message('text'), async (ctx) => {
@@ -146,8 +134,6 @@ bot.on(message('text'), async (ctx) => {
     // Using context shortcut
     await ctx.reply(`Hello ${ctx.message.from.first_name}`);
 });
-
-
 
 
 
@@ -164,20 +150,6 @@ bot.launch({
     .catch(() => {
         console.error("Error while lanch Webhook ");
     });
-
-
-// https://www.npmjs.com/package/telegraf
-
-
-
-function convertToFRecimal(value) {
-    const valueString = String(value);
-    if (!valueString?.includes(".")) return valueString;
-    const latTab = valueString?.split(".");
-    const decimalPart = latTab ? latTab[0] : 0;
-    const floatingPart = latTab ? latTab[1] : 0;
-    return `${decimalPart},${floatingPart}`;
-}
 
 
 // Enable graceful stop
