@@ -2,17 +2,59 @@ require('dotenv').config()
 const { Telegraf, Markup } = require('telegraf');
 const { message } = require('telegraf/filters');
 
-const { PORT, TELEGRAM_TOKEN, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK } = process.env
+const { PORT, 
+  TELEGRAM_TOKEN_PROD,
+  TELEGRAM_TOKEN_DEV,
+  SERVER_URL_PROD, 
+  SERVER_URL_DEV, 
+  ENVIRONMENT, 
+  WEB_LINK_NEAREST_PHARMACIES,
+  WEB_LINK_REGISTER_PHARMACy
+} = process.env
+
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
+const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
 
 
 
 const bot = new Telegraf(TELEGRAM_TOKEN);
+// bot.use(session());
+const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches, veuillez envoyer votre localisation";
+const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer une pharmacie, veuillez envoyer votre localisation";
 
 bot.start((ctx) => {
-  ctx.reply('Bienvenue ! \n Connect Pharma \n');
-  ctx.reply('Choisir une option');
+  
+  ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
+  ctx.reply(`1: /Pharmacies_Proches \n  \n 2: /Enregistrer_Pharmacie \n`);
+
 });
+
+
+bot.command("Pharmacies_Proches", ctx => {
+  // session.set
+	return ctx.reply(
+		MESSAGE_SHOW_NEAREST_PHARMACIES,
+		Markup.keyboard([
+			Markup.button.locationRequest("Envoyer votre localisation"),
+		])
+        .oneTime()
+        .resize()       
+        ,
+	)
+})
+
+bot.command("Enregistrer_Pharmacie", ctx => {
+  // ctx.session.walletData = 'Enregistrer_Pharmacie';
+	return ctx.reply(
+		MESSAGE_REGISTER_PHARMACY,
+		Markup.keyboard([
+			Markup.button.locationRequest("Envoyer votre localisation"),
+		])
+        .oneTime()
+        .resize()       
+        ,
+	)
+})
 
 bot.command('oldschool', (ctx) => ctx.reply('Hello'));
 bot.command('hipster', Telegraf.reply('λ'));
@@ -31,6 +73,8 @@ bot.command("location", ctx => {
 })
 
 bot.on(message("location"), ctx => {
+  const reply_msg = ctx.message.reply_to_message?.message_id
+  const reply_to_message = ctx.update.message?.reply_to_message?.text;
 	const { latitude, longitude } = ctx.message.location
 
 	  console.log({ latitude, longitude });
@@ -38,16 +82,28 @@ bot.on(message("location"), ctx => {
     const longitudeFr = convertToFRecimal(longitude);
 
     console.log({ latitudeFr, longitudeFr })
-    console.log(`${WEB_LINK}/${latitudeFr}/${longitudeFr}`);
+    console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
 
-    ctx.reply("Welcome :)))))", {
-        reply_markup: {
-          keyboard: [[{
-             text: "Clicker ici pour ouvrir web app Telegram", 
-             web_app: { url: `${WEB_LINK}/${latitudeFr}/${longitudeFr}` } 
-            }]],
-        },
-    })
+    if(reply_to_message === MESSAGE_SHOW_NEAREST_PHARMACIES) {
+      ctx.reply("Welcome :)))))", {
+          reply_markup: {
+            keyboard: [[{
+               text: "Clicker ici pour ouvrir web app Telegram", 
+               web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` } 
+              }]],
+          },
+      })
+    } else if (reply_to_message === MESSAGE_REGISTER_PHARMACY){
+        console.log("process register new pharmacy")
+        ctx.reply("Welcome :)))))", {
+          reply_markup: {
+            keyboard: [[{
+               text: "Clicker ici pour ouvrir web app Telegram", 
+               web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` } 
+              }]],
+          },
+      })
+    }
 })
 
 bot.on(message('text'), async (ctx) => {
@@ -89,3 +145,8 @@ function convertToFRecimal(value) {
   const floatingPart = latTab ? latTab[1] : 0;
   return `${decimalPart},${floatingPart}`;
 }
+
+
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
