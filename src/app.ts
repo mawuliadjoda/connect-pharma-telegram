@@ -65,7 +65,6 @@ bot.start((ctx) => {
 
 bot.command("Pharmacies_Proches", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
-    console.log(`context value: ${ctx.session}`);
     return ctx.reply(
         MESSAGE_SHOW_NEAREST_PHARMACIES,
         Markup.keyboard([
@@ -79,7 +78,6 @@ bot.command("Pharmacies_Proches", ctx => {
 
 bot.command("Enregistrer_Pharmacie", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
-    console.log(`context value: ${ctx.session}`);
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
         Markup.keyboard([
@@ -104,7 +102,7 @@ bot.on(message("location"), ctx => {
 
     console.log({ latitudeFr, longitudeFr })
     console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
-
+    console.log(`context value: ${ctx.session.choice}`);
     if (ctx.session.choice === NEAREST_PHARMACIES) {
         ctx.reply("Welcome :)))))", {
             reply_markup: {
@@ -155,3 +153,5 @@ bot.launch({
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+// https://github.com/feathers-studio/telegraf-docs/blob/master/examples/session-bot.ts

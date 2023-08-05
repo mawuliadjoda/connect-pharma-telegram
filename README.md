@@ -33,3 +33,8 @@ https://devcenter.heroku.com/articles/deploying-nodejs#build-your-app-and-run-it
 
  https://stackoverflow.com/questions/34631300/why-do-i-obtain-this-error-when-deploying-app-to-heroku
  https://stackoverflow.com/questions/18406721/heroku-does-not-appear-to-be-a-git-repository
+
+
+
+ # use session in telegram 
+ https://github.com/feathers-studio/telegraf-docs/blob/master/examples/session-bot.ts
