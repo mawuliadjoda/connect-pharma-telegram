@@ -36,13 +36,13 @@ bot.on("message", async ctx => {
     await ctx.reply(`Seen ${ctx.session.messageCount} messages.`);
 });
 */
-bot.start((ctx) => {
+bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     ctx.session = { messageCount: 0, choice: '' };
     ctx.session.messageCount++;
     console.log(`context value: ${ctx.session.messageCount}`);
-    ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
-    ctx.reply(`1: /Pharmacies_Proches \n  \n 2: /Enregistrer_Pharmacie \n`);
-});
+    yield ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
+    ctx.reply(`1: /Pharmacies_Proches \n\n  \n 2: /Enregistrer_Pharmacie \n`);
+}));
 bot.command("Pharmacies_Proches", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
     return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([

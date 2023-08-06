@@ -38,3 +38,8 @@ https://devcenter.heroku.com/articles/deploying-nodejs#build-your-app-and-run-it
 
  # use session in telegram 
  https://github.com/feathers-studio/telegraf-docs/blob/master/examples/session-bot.ts
+
+
+
+ # Use Typescript 
+ https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
