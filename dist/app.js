@@ -16,8 +16,9 @@ const Util_1 = require("./Util");
 const { PORT, TELEGRAM_TOKEN_PROD, TELEGRAM_TOKEN_DEV, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK_NEAREST_PHARMACIES, WEB_LINK_REGISTER_PHARMACy } = process.env;
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
-const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches, veuillez envoyer votre localisation";
-const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer une pharmacie, veuillez envoyer votre localisation";
+const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches de vous , veuillez envoyer votre localisation";
+const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer votre pharmacie dans notre système, veuillez envoyer votre localisation";
+const THANKS_FOR_SHARING_LOCATION_MESSAGE = 'Merci, nous avons bien reçu votre localisation';
 const NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
 const REGISTER_PHARMACY = 'REGISTER_PHARMACY';
 if (TELEGRAM_TOKEN === undefined) {
@@ -40,25 +41,71 @@ bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     ctx.session = { messageCount: 0, choice: '' };
     ctx.session.messageCount++;
     console.log(`context value: ${ctx.session.messageCount}`);
-    yield ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
-    ctx.reply(`1: /Pharmacies_Proches \n\n  \n 2: /Enregistrer_Pharmacie \n`);
+    yield ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
+    return ctx.reply(`\n<i>${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
+        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+    ])));
 }));
-bot.command("Pharmacies_Proches", ctx => {
+bot.command("inline", ctx => {
+    return ctx.reply("<b>Coke</b> or <i>Pepsi?</i>", Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
+        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+    ])));
+});
+bot.action("Pharmacies_Proches", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
     return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([
-        telegraf_1.Markup.button.locationRequest("Envoyer votre localisation"),
+        telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
         .oneTime()
         .resize());
 });
-bot.command("Enregistrer_Pharmacie", ctx => {
+bot.action("Enregistrer_Pharmacie", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
     return ctx.reply(MESSAGE_REGISTER_PHARMACY, telegraf_1.Markup.keyboard([
-        telegraf_1.Markup.button.locationRequest("Envoyer votre localisation"),
+        telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
         .oneTime()
         .resize());
 });
+/*
+
+bot.start(async ctx => {
+    ctx.session = { messageCount: 0, choice: '' };
+    ctx.session.messageCount++;
+    console.log(`context value: ${ctx.session.messageCount}`);
+    await ctx.reply('Bienvenue ! \n Connect Pharma \n Choisir une option clickez ci-dessous');
+    ctx.reply(`1: /Pharmacies_Proches \n\n  \n 2: /Enregistrer_Pharmacie \n`);
+
+});
+
+bot.command("Pharmacies_Proches", ctx => {
+    ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
+    return ctx.reply(
+        MESSAGE_SHOW_NEAREST_PHARMACIES,
+        Markup.keyboard([
+            Markup.button.locationRequest("Envoyer votre localisation"),
+        ])
+            .oneTime()
+            .resize()
+        ,
+    )
+})
+
+bot.command("Enregistrer_Pharmacie", ctx => {
+    ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
+    return ctx.reply(
+        MESSAGE_REGISTER_PHARMACY,
+        Markup.keyboard([
+            Markup.button.locationRequest("Envoyer votre localisation"),
+        ])
+            .oneTime()
+            .resize()
+        ,
+    )
+})
+*/
 bot.on((0, filters_1.message)("location"), ctx => {
     console.log(ctx.session);
     const { latitude, longitude } = ctx.message.location;
@@ -69,10 +116,10 @@ bot.on((0, filters_1.message)("location"), ctx => {
     console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
     console.log(`context value: ${ctx.session.choice}`);
     if (ctx.session.choice === NEAREST_PHARMACIES) {
-        ctx.reply("Welcome :)))))", {
+        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
             reply_markup: {
                 keyboard: [[{
-                            text: "Clicker ici pour ouvrir web app Telegram",
+                            text: "Clickez ici pour voir les pharmacies proches de vous !",
                             web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` }
                         }]],
             },
@@ -80,10 +127,10 @@ bot.on((0, filters_1.message)("location"), ctx => {
     }
     else if (ctx.session.choice === REGISTER_PHARMACY) {
         console.log("process register new pharmacy");
-        ctx.reply("Welcome :)))))", {
+        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
             reply_markup: {
                 keyboard: [[{
-                            text: "Clicker ici pour ouvrir web app Telegram",
+                            text: "Clickez ici pour enregistrer votre pharmacie !",
                             web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` }
                         }]],
             },
@@ -113,4 +160,5 @@ bot.launch({
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 // https://github.com/feathers-studio/telegraf-docs/blob/master/examples/session-bot.ts
+// https://fr.javascript.info/async-await
 //# sourceMappingURL=app.js.map
