@@ -61,7 +61,7 @@ bot.start(async ctx => {
     console.log(`context value: ${ctx.session.messageCount}`);
 
    await ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', {parse_mode: 'HTML'});
-   return ctx.reply(`\n<i>${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
+   return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
 		parse_mode: "HTML",
 		...Markup.inlineKeyboard([
 			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
