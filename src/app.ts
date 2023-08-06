@@ -64,21 +64,12 @@ bot.start(async ctx => {
    return ctx.reply(`\n<i>${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
 		parse_mode: "HTML",
 		...Markup.inlineKeyboard([
-			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
 			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
 		]),
 	});
 });
 
-bot.command("inline", ctx => {
-	return ctx.reply("<b>Coke</b> or <i>Pepsi?</i>", {
-		parse_mode: "HTML",
-		...Markup.inlineKeyboard([
-			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
-			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-		]),
-	});
-});
 
 bot.action("Pharmacies_Proches", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
@@ -183,10 +174,19 @@ bot.on(message("location"), ctx => {
 
 bot.on(message('text'), async (ctx) => {
     // Explicit usage
-    await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
+    // await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
 
     // Using context shortcut
-    await ctx.reply(`Hello ${ctx.message.from.first_name}`);
+    // await ctx.reply(`Hello ${ctx.message.from.first_name}`);
+
+
+    return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
+		parse_mode: "HTML",
+		...Markup.inlineKeyboard([
+			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+		]),
+	});
 });
 
 

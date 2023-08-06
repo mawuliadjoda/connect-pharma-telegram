@@ -43,16 +43,10 @@ bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`context value: ${ctx.session.messageCount}`);
     yield ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
     return ctx.reply(`\n<i>${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
-        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
         telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
     ])));
 }));
-bot.command("inline", ctx => {
-    return ctx.reply("<b>Coke</b> or <i>Pepsi?</i>", Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
-        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
-        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-    ])));
-});
 bot.action("Pharmacies_Proches", ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
     return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([
@@ -139,9 +133,13 @@ bot.on((0, filters_1.message)("location"), ctx => {
 });
 bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     // Explicit usage
-    yield ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
+    // await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
     // Using context shortcut
-    yield ctx.reply(`Hello ${ctx.message.from.first_name}`);
+    // await ctx.reply(`Hello ${ctx.message.from.first_name}`);
+    return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
+        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+    ])));
 }));
 // Start webhook via launch method (preferred)
 bot.launch({
