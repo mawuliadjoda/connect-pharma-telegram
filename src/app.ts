@@ -1,5 +1,6 @@
-require('dotenv').config()
+//  https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
 
+require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
 import { convertToFRecimal } from "./Util";
