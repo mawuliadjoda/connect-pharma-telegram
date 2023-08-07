@@ -1,4 +1,5 @@
 "use strict";
+//  https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -121,6 +122,7 @@ bot.on((0, filters_1.message)("location"), ctx => {
     }
     else if (ctx.session.choice === REGISTER_PHARMACY) {
         console.log("process register new pharmacy");
+        console.log(`${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}`);
         ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
             reply_markup: {
                 keyboard: [[{
