@@ -161,7 +161,8 @@ bot.on(message("location"), ctx => {
             },
         })
     } else if (ctx.session.choice === REGISTER_PHARMACY) {
-        console.log("process register new pharmacy")
+        console.log("process register new pharmacy");
+        console.log(`${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}`);
         ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
             reply_markup: {
                 keyboard: [[{
