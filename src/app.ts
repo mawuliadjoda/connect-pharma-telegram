@@ -4,6 +4,7 @@ require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
 import { convertToFRecimal } from "./Util";
+import { Location } from "telegraf/typings/core/types/typegram";
 
 
 const { PORT,
@@ -19,15 +20,29 @@ const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV! : TELEGRAM_TOKEN_PROD!;
 
 const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches de vous , veuillez envoyer votre localisation";
+const MESSAGE_SEND_CONTACT = "Veuillez envoyer votre contact ";
 const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer votre pharmacie dans notre système, veuillez envoyer votre localisation";
 const THANKS_FOR_SHARING_LOCATION_MESSAGE = 'Merci, nous avons bien reçu votre localisation';
 
 const NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
 const REGISTER_PHARMACY = 'REGISTER_PHARMACY';
 
+
+enum STEP {
+    INIT = 'INIT',
+    SHARE_LOCATION = 'SHARE_LOCATION',
+    SHARE_CONTACT = 'SHARE_CONTACT',
+}
+
 interface SessionData {
     messageCount: number;
     choice: string;
+    step: STEP,
+    data: {
+        latitude: string,
+        longitude: string,
+        contact: string
+    }
     // ... more session data go here
 }
 
@@ -47,33 +62,33 @@ const bot = new Telegraf<MyContext>(TELEGRAM_TOKEN);
 // Make session data available
 bot.use(session());
 
-// Register middleware
-/*
-bot.on("message", async ctx => {
-    // set a default value
-    ctx.session ??= { messageCount: 0 };
-    ctx.session.messageCount++;
-    await ctx.reply(`Seen ${ctx.session.messageCount} messages.`);
-});
-*/
+
 bot.start(async ctx => {
-    ctx.session = { messageCount: 0, choice: '' };
-    ctx.session.messageCount++;
+    ctx.session = {
+        messageCount: 0,
+        choice: '',
+        step: STEP.INIT,
+        data: { latitude: '', longitude: '', contact: '' }
+    };
     console.log(`context value: ${ctx.session.messageCount}`);
 
-   await ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', {parse_mode: 'HTML'});
-   return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
-		parse_mode: "HTML",
-		...Markup.inlineKeyboard([
-			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
-		]),
-	});
+    await ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
+    return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
+        parse_mode: "HTML",
+        ...Markup.inlineKeyboard([
+            Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+            Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        ]),
+    });
 });
 
 
 bot.action("Pharmacies_Proches", ctx => {
-    ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
+
+    ctx.session.messageCount++;
+    ctx.session.choice = NEAREST_PHARMACIES;
+    ctx.session.step = STEP.SHARE_LOCATION;
+
     return ctx.reply(
         MESSAGE_SHOW_NEAREST_PHARMACIES,
         Markup.keyboard([
@@ -86,7 +101,9 @@ bot.action("Pharmacies_Proches", ctx => {
 });
 
 bot.action("Enregistrer_Pharmacie", ctx => {
-    ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
+    ctx.session.messageCount++;
+    ctx.session.choice = REGISTER_PHARMACY;
+    ctx.session.step = STEP.SHARE_LOCATION;
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
         Markup.keyboard([
@@ -97,6 +114,7 @@ bot.action("Enregistrer_Pharmacie", ctx => {
         ,
     )
 });
+
 
 
 
@@ -138,41 +156,59 @@ bot.command("Enregistrer_Pharmacie", ctx => {
 })
 */
 
-bot.on(message("location"), ctx => {
-    console.log(ctx.session);
-
-
+bot.on(message("location"), async ctx => {  
     const { latitude, longitude } = ctx.message.location
 
-    console.log({ latitude, longitude });
-    const latitudeFr = convertToFRecimal(latitude);
-    const longitudeFr = convertToFRecimal(longitude);
+    ctx.session.data.latitude = convertToFRecimal(latitude);
+    ctx.session.data.longitude = convertToFRecimal(longitude);
+    ctx.session.step = STEP.SHARE_CONTACT;
 
-    console.log({ latitudeFr, longitudeFr })
-    console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
-    console.log(`context value: ${ctx.session.choice}`);
-    if (ctx.session.choice === NEAREST_PHARMACIES) {
-        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
-            reply_markup: {
-                keyboard: [[{
-                    text: "Clickez ici pour voir les pharmacies proches de vous !",
-                    web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` }
-                }]],
-            },
-        })
-    } else if (ctx.session.choice === REGISTER_PHARMACY) {
-        console.log("process register new pharmacy");
-        console.log(`${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}`);
-        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
-            reply_markup: {
-                keyboard: [[{
-                    text: "Clickez ici pour enregistrer votre pharmacie !",
-                    web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` }
-                }]],
-            },
-        })
-    }
+    console.log(ctx.session);
+
+    await ctx.reply(
+        MESSAGE_SEND_CONTACT,
+        Markup.keyboard([
+            Markup.button.contactRequest("Clickez ici pour envoyer votre numero de tel"),
+        ])
+            .oneTime()
+            .resize()
+        ,
+    );
 })
+
+bot.on(message("contact"), async ctx => {
+
+    console.log("session" + ctx.session);
+    ctx.session.data.contact = ctx.message.contact.phone_number;
+    switch (ctx.session.choice) {
+        case NEAREST_PHARMACIES:
+            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+                reply_markup: {
+                    keyboard: [[{
+                        text: "Clickez ici pour voir les pharmacies proches de vous !",
+                        web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}` }
+                    }]],
+                },
+            })
+            break;
+        case REGISTER_PHARMACY:
+            console.log("process register new pharmacy");
+            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}`);
+            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+                reply_markup: {
+                    keyboard: [[{
+                        text: "Clickez ici pour enregistrer votre pharmacie !",
+                        web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}` }
+                    }]],
+                },
+            })
+            break;
+
+        default:
+            break;
+    }
+
+});
 
 bot.on(message('text'), async (ctx) => {
     // Explicit usage
@@ -180,17 +216,33 @@ bot.on(message('text'), async (ctx) => {
 
     // Using context shortcut
     // await ctx.reply(`Hello ${ctx.message.from.first_name}`);
-
-
+    ctx.session = {
+        messageCount: 0,
+        choice: '',
+        step: STEP.INIT,
+        data: { latitude: '', longitude: '', contact: '' }
+    };
+    console.log(`web_app_data :${ctx.message}`)
     return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
-		parse_mode: "HTML",
-		...Markup.inlineKeyboard([
-			Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-			Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
-		]),
-	});
+        parse_mode: "HTML",
+        ...Markup.inlineKeyboard([
+            Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
+            Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        ]),
+    });
 });
 
+bot.on('web_app_data', (ctx) => {
+    var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
+    console.log(ctx.message.web_app_data.data);
+    ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
+})
+
+bot.on("message", async (ctx) => {
+    console.log(`web_app_data :${ctx.message}`)
+    return ctx.reply(ctx.message.from.first_name)
+
+});
 
 
 // Start webhook via launch method (preferred)

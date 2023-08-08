@@ -18,10 +18,17 @@ const { PORT, TELEGRAM_TOKEN_PROD, TELEGRAM_TOKEN_DEV, SERVER_URL_PROD, SERVER_U
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
 const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches de vous , veuillez envoyer votre localisation";
+const MESSAGE_SEND_CONTACT = "Veuillez envoyer votre contact ";
 const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer votre pharmacie dans notre système, veuillez envoyer votre localisation";
 const THANKS_FOR_SHARING_LOCATION_MESSAGE = 'Merci, nous avons bien reçu votre localisation';
 const NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
 const REGISTER_PHARMACY = 'REGISTER_PHARMACY';
+var STEP;
+(function (STEP) {
+    STEP["INIT"] = "INIT";
+    STEP["SHARE_LOCATION"] = "SHARE_LOCATION";
+    STEP["SHARE_CONTACT"] = "SHARE_CONTACT";
+})(STEP || (STEP = {}));
 if (TELEGRAM_TOKEN === undefined) {
     throw new TypeError("BOT_TOKEN must be provided!");
 }
@@ -29,18 +36,13 @@ if (TELEGRAM_TOKEN === undefined) {
 const bot = new telegraf_1.Telegraf(TELEGRAM_TOKEN);
 // Make session data available
 bot.use((0, telegraf_1.session)());
-// Register middleware
-/*
-bot.on("message", async ctx => {
-    // set a default value
-    ctx.session ??= { messageCount: 0 };
-    ctx.session.messageCount++;
-    await ctx.reply(`Seen ${ctx.session.messageCount} messages.`);
-});
-*/
 bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
-    ctx.session = { messageCount: 0, choice: '' };
-    ctx.session.messageCount++;
+    ctx.session = {
+        messageCount: 0,
+        choice: '',
+        step: STEP.INIT,
+        data: { latitude: '', longitude: '', contact: '' }
+    };
     console.log(`context value: ${ctx.session.messageCount}`);
     yield ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
     return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
@@ -49,7 +51,9 @@ bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     ])));
 }));
 bot.action("Pharmacies_Proches", ctx => {
-    ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
+    ctx.session.messageCount++;
+    ctx.session.choice = NEAREST_PHARMACIES;
+    ctx.session.step = STEP.SHARE_LOCATION;
     return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([
         telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
@@ -57,7 +61,9 @@ bot.action("Pharmacies_Proches", ctx => {
         .resize());
 });
 bot.action("Enregistrer_Pharmacie", ctx => {
-    ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
+    ctx.session.messageCount++;
+    ctx.session.choice = REGISTER_PHARMACY;
+    ctx.session.step = STEP.SHARE_LOCATION;
     return ctx.reply(MESSAGE_REGISTER_PHARMACY, telegraf_1.Markup.keyboard([
         telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
@@ -101,47 +107,73 @@ bot.command("Enregistrer_Pharmacie", ctx => {
     )
 })
 */
-bot.on((0, filters_1.message)("location"), ctx => {
-    console.log(ctx.session);
+bot.on((0, filters_1.message)("location"), (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     const { latitude, longitude } = ctx.message.location;
-    console.log({ latitude, longitude });
-    const latitudeFr = (0, Util_1.convertToFRecimal)(latitude);
-    const longitudeFr = (0, Util_1.convertToFRecimal)(longitude);
-    console.log({ latitudeFr, longitudeFr });
-    console.log(`${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}`);
-    console.log(`context value: ${ctx.session.choice}`);
-    if (ctx.session.choice === NEAREST_PHARMACIES) {
-        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
-            reply_markup: {
-                keyboard: [[{
-                            text: "Clickez ici pour voir les pharmacies proches de vous !",
-                            web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${latitudeFr}/${longitudeFr}` }
-                        }]],
-            },
-        });
+    ctx.session.data.latitude = (0, Util_1.convertToFRecimal)(latitude);
+    ctx.session.data.longitude = (0, Util_1.convertToFRecimal)(longitude);
+    ctx.session.step = STEP.SHARE_CONTACT;
+    console.log(ctx.session);
+    yield ctx.reply(MESSAGE_SEND_CONTACT, telegraf_1.Markup.keyboard([
+        telegraf_1.Markup.button.contactRequest("Clickez ici pour envoyer votre numero de tel"),
+    ])
+        .oneTime()
+        .resize());
+}));
+bot.on((0, filters_1.message)("contact"), (ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("session" + ctx.session);
+    ctx.session.data.contact = ctx.message.contact.phone_number;
+    switch (ctx.session.choice) {
+        case NEAREST_PHARMACIES:
+            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+                reply_markup: {
+                    keyboard: [[{
+                                text: "Clickez ici pour voir les pharmacies proches de vous !",
+                                web_app: { url: `${WEB_LINK_NEAREST_PHARMACIES}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}` }
+                            }]],
+                },
+            });
+            break;
+        case REGISTER_PHARMACY:
+            console.log("process register new pharmacy");
+            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}`);
+            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+                reply_markup: {
+                    keyboard: [[{
+                                text: "Clickez ici pour enregistrer votre pharmacie !",
+                                web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}` }
+                            }]],
+                },
+            });
+            break;
+        default:
+            break;
     }
-    else if (ctx.session.choice === REGISTER_PHARMACY) {
-        console.log("process register new pharmacy");
-        console.log(`${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}`);
-        ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
-            reply_markup: {
-                keyboard: [[{
-                            text: "Clickez ici pour enregistrer votre pharmacie !",
-                            web_app: { url: `${WEB_LINK_REGISTER_PHARMACy}/${latitudeFr}/${longitudeFr}` }
-                        }]],
-            },
-        });
-    }
-});
+}));
 bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     // Explicit usage
     // await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
     // Using context shortcut
     // await ctx.reply(`Hello ${ctx.message.from.first_name}`);
+    ctx.session = {
+        messageCount: 0,
+        choice: '',
+        step: STEP.INIT,
+        data: { latitude: '', longitude: '', contact: '' }
+    };
+    console.log(`web_app_data :${ctx.message}`);
     return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
         telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
         telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
     ])));
+}));
+bot.on('web_app_data', (ctx) => {
+    var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_');
+    console.log(ctx.message.web_app_data.data);
+    ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
+});
+bot.on("message", (ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(`web_app_data :${ctx.message}`);
+    return ctx.reply(ctx.message.from.first_name);
 }));
 // Start webhook via launch method (preferred)
 bot.launch({
