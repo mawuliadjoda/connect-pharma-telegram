@@ -135,7 +135,7 @@ bot.on((0, filters_1.message)("contact"), (ctx) => __awaiter(void 0, void 0, voi
             break;
         case REGISTER_PHARMACY:
             console.log("process register new pharmacy");
-            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}`);
+            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}`);
             ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
                 reply_markup: {
                     keyboard: [[{

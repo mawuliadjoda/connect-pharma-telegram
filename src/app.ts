@@ -193,7 +193,7 @@ bot.on(message("contact"), async ctx => {
             break;
         case REGISTER_PHARMACY:
             console.log("process register new pharmacy");
-            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}`);
+            console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}`);
             ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
                 reply_markup: {
                     keyboard: [[{
