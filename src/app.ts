@@ -179,7 +179,7 @@ bot.on(message("location"), async ctx => {
 bot.on(message("contact"), async ctx => {
 
     ctx.session.data.contact = ctx.message.contact.phone_number;
-    console.log("session" + ctx.session);
+    console.log(ctx.session);
     switch (ctx.session.choice) {
         case NEAREST_PHARMACIES:
             ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
