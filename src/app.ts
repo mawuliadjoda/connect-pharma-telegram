@@ -4,7 +4,7 @@ require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
 import { convertToFRecimal } from "./Util";
-// import { Location } from "telegraf/typings/core/types/typegram";
+import { Location } from "telegraf/typings/core/types/typegram";
 
 
 const { PORT,

@@ -14,7 +14,6 @@ require('dotenv').config();
 const telegraf_1 = require("telegraf");
 const filters_1 = require("telegraf/filters");
 const Util_1 = require("./Util");
-// import { Location } from "telegraf/typings/core/types/typegram";
 const { PORT, TELEGRAM_TOKEN_PROD, TELEGRAM_TOKEN_DEV, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK_NEAREST_PHARMACIES, WEB_LINK_REGISTER_PHARMACy, } = process.env;
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
