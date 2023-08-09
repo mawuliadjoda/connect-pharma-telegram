@@ -70,7 +70,7 @@ bot.start(async ctx => {
         step: STEP.INIT,
         data: { latitude: '', longitude: '', contact: '' }
     };
-    console.log(`context value: ${ctx.session.messageCount}`);
+    console.log(`context value: ${ctx.session}`);
 
     await ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
     return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
@@ -178,8 +178,8 @@ bot.on(message("location"), async ctx => {
 
 bot.on(message("contact"), async ctx => {
 
-    console.log("session" + ctx.session);
     ctx.session.data.contact = ctx.message.contact.phone_number;
+    console.log("session" + ctx.session);
     switch (ctx.session.choice) {
         case NEAREST_PHARMACIES:
             ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
