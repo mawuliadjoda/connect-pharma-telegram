@@ -4,7 +4,7 @@ require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
 import { convertToFRecimal } from "./Util";
-import { Location } from "telegraf/typings/core/types/typegram";
+// import { Location } from "telegraf/typings/core/types/typegram";
 
 
 const { PORT,
@@ -14,18 +14,11 @@ const { PORT,
     SERVER_URL_DEV,
     ENVIRONMENT,
     WEB_LINK_NEAREST_PHARMACIES,
-    WEB_LINK_REGISTER_PHARMACy
+    WEB_LINK_REGISTER_PHARMACy,
+    
 } = process.env
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV! : TELEGRAM_TOKEN_PROD!;
-
-const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches de vous , veuillez envoyer votre localisation";
-const MESSAGE_SEND_CONTACT = "Veuillez envoyer votre contact ";
-const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer votre pharmacie dans notre système, veuillez envoyer votre localisation";
-const THANKS_FOR_SHARING_LOCATION_MESSAGE = 'Merci, nous avons bien reçu votre localisation';
-
-const NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
-const REGISTER_PHARMACY = 'REGISTER_PHARMACY';
 
 
 enum STEP {
@@ -86,7 +79,7 @@ bot.start(async ctx => {
 bot.action("Pharmacies_Proches", ctx => {
 
     ctx.session.messageCount++;
-    ctx.session.choice = NEAREST_PHARMACIES;
+    ctx.session.choice = ACTION_NEAREST_PHARMACIES;
     ctx.session.step = STEP.SHARE_LOCATION;
 
     return ctx.reply(
@@ -94,6 +87,7 @@ bot.action("Pharmacies_Proches", ctx => {
         Markup.keyboard([
             Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
         ])
+            
             .oneTime()
             .resize()
         ,
@@ -102,7 +96,7 @@ bot.action("Pharmacies_Proches", ctx => {
 
 bot.action("Enregistrer_Pharmacie", ctx => {
     ctx.session.messageCount++;
-    ctx.session.choice = REGISTER_PHARMACY;
+    ctx.session.choice = ACTION_REGISTER_PHARMACY;
     ctx.session.step = STEP.SHARE_LOCATION;
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
@@ -156,6 +150,7 @@ bot.command("Enregistrer_Pharmacie", ctx => {
 })
 */
 
+
 bot.on(message("location"), async ctx => {  
     const { latitude, longitude } = ctx.message.location
 
@@ -181,8 +176,8 @@ bot.on(message("contact"), async ctx => {
     ctx.session.data.contact = ctx.message.contact.phone_number;
     console.log(ctx.session);
     switch (ctx.session.choice) {
-        case NEAREST_PHARMACIES:
-            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+        case ACTION_NEAREST_PHARMACIES:
+            ctx.reply(MESSAGE_THANKS_FOR_SHARING_INFORMATION_CONTACT, {
                 reply_markup: {
                     keyboard: [[{
                         text: "Clickez ici pour voir les pharmacies proches de vous !",
@@ -191,10 +186,10 @@ bot.on(message("contact"), async ctx => {
                 },
             })
             break;
-        case REGISTER_PHARMACY:
+        case ACTION_REGISTER_PHARMACY:
             console.log("process register new pharmacy");
             console.log(`${WEB_LINK_REGISTER_PHARMACy}/${ctx.session.data.latitude}/${ctx.session.data.longitude}/${ctx.session.data.contact}`);
-            ctx.reply(THANKS_FOR_SHARING_LOCATION_MESSAGE, {
+            ctx.reply(MESSAGE_THANKS_FOR_SHARING_INFORMATION_CONTACT, {
                 reply_markup: {
                     keyboard: [[{
                         text: "Clickez ici pour enregistrer votre pharmacie !",
@@ -266,3 +261,13 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 // https://github.com/feathers-studio/telegraf-docs/blob/master/examples/session-bot.ts
 // https://fr.javascript.info/async-await
+
+
+
+const MESSAGE_SHOW_NEAREST_PHARMACIES = "Pour voir les pharmacies proches de vous , veuillez envoyer votre localisation";
+const MESSAGE_SEND_CONTACT = "Comment pouvons-nous vous contactez ? \n Merci de nous envoyer votre Numero de Tel:";
+const MESSAGE_REGISTER_PHARMACY = "Pour enregistrer votre pharmacie dans notre système, veuillez envoyer votre localisation";
+const MESSAGE_THANKS_FOR_SHARING_INFORMATION_CONTACT = 'Merci, nous avons bien reçu vos informations !';
+
+const ACTION_NEAREST_PHARMACIES = 'NEAREST_PHARMACIES';
+const ACTION_REGISTER_PHARMACY = 'REGISTER_PHARMACY';
