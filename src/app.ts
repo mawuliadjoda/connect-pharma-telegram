@@ -227,9 +227,13 @@ bot.on(message('text'), async (ctx) => {
     });
 });
 
-bot.on('web_app_data', (ctx) => {
-    var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
+bot.on('web_app_data', async (ctx) => {
+    // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
+    await ctx.reply(ctx.message.web_app_data.data);
+    ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
+
+    // https://connect-pharma-911ea.web.app/auth/register
     ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
 })
 
