@@ -160,11 +160,14 @@ bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0
         telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
     ])));
 }));
-bot.on('web_app_data', (ctx) => {
-    var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_');
+bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
+    yield ctx.reply(ctx.message.web_app_data.data);
+    ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
+    // https://connect-pharma-911ea.web.app/auth/register
     ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
-});
+}));
 bot.on("message", (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`web_app_data :${ctx.message}`);
     return ctx.reply(ctx.message.from.first_name);
