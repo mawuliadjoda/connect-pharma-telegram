@@ -231,10 +231,19 @@ bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
     await ctx.reply(ctx.message.web_app_data.data);
-    ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
+    // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
 
-    // https://connect-pharma-911ea.web.app/auth/register
-    ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
+    
+    ctx.reply(ctx.message.web_app_data.data, {
+        reply_markup: {
+            keyboard: [[{
+                        text: "Clickez ici pour créer votre compte !",
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register` }
+                    }]],
+        },
+    });
+
+    // ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
 })
 
 bot.on("message", async (ctx) => {
