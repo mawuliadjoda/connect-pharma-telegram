@@ -24,8 +24,16 @@
 https://devcenter.heroku.com/articles/git
 https://devcenter.heroku.com/articles/deploying-nodejs#build-your-app-and-run-it-locally
 
-   1:  heroku git:remote -a connect-pharma-telegram
-   2:  git push heroku master
+1.  heroku login
+2.  heroku create connect-pharma-telegram
+3.  heroku git:remote -a connect-pharma-telegram
+
+# commit file in git
+4.  git add .
+5.  git commit -m "deploy to prod"
+
+6.  git push heroku master
+
 
 
  # error encountered

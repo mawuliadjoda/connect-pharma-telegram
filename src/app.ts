@@ -230,7 +230,7 @@ bot.on(message('text'), async (ctx) => {
 bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
-    await ctx.reply(ctx.message.web_app_data.data);
+    // await ctx.reply(ctx.message.web_app_data.data);
     // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
 
     
@@ -238,7 +238,7 @@ bot.on('web_app_data', async (ctx) => {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register` }
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}` }
                     }]],
         },
     });
