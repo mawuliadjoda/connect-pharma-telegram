@@ -167,11 +167,12 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
     const data = JSON.parse(ctx.message.web_app_data.data);
     console.log(data.message);
+    console.log((0, Util_1.convertToFRecimal)(data.email));
     ctx.reply(data.message, {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.hasEmail}` }
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${(0, Util_1.convertToFRecimal)(data.email)}` }
                     }]],
         },
     });

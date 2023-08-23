@@ -242,12 +242,13 @@ bot.on('web_app_data', async (ctx) => {
     const data: WebAppData = JSON.parse(ctx.message.web_app_data.data);
     
     console.log(data.message);
+    console.log(convertToFRecimal(data.email));
 
     ctx.reply(data.message, {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.hasEmail}` }
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${convertToFRecimal(data.email)}` }
                     }]],
         },
     });
