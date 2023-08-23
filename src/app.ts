@@ -230,7 +230,8 @@ bot.on(message('text'), async (ctx) => {
 type WebAppData = {
     message: string,
     email: string,
-    tel: string
+    tel: string,
+    hasEmail: boolean
 }
 bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
@@ -246,7 +247,7 @@ bot.on('web_app_data', async (ctx) => {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.email}` }
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.hasEmail}` }
                     }]],
         },
     });

@@ -171,7 +171,7 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.email}` }
+                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.hasEmail}` }
                     }]],
         },
     });
