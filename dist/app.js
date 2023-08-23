@@ -168,14 +168,24 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     const data = JSON.parse(ctx.message.web_app_data.data);
     console.log(data.message);
     console.log((0, Util_1.convertToFRecimal)(data.email));
-    ctx.reply(data.message, {
-        reply_markup: {
-            keyboard: [[{
-                        text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${(0, Util_1.convertToFRecimal)(data.email)}` }
-                    }]],
-        },
-    });
+    switch (data.step) {
+        case Util_1.WebAppDataStep.CREATE_ACOUNT:
+            ctx.reply(data.message, {
+                reply_markup: {
+                    keyboard: [[{
+                                text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
+                                web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${(0, Util_1.convertToFRecimal)(data.email)}` }
+                            }]],
+                },
+            });
+            break;
+        case Util_1.WebAppDataStep.LOGIN:
+            yield ctx.reply(data.message);
+            ctx.reply(`<b>Veuillez créer votre compte: \n ${data.frontendUrl} !</b>`, { parse_mode: 'HTML' });
+            break;
+        default:
+            break;
+    }
     // ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
 }));
 bot.on("message", (ctx) => __awaiter(void 0, void 0, void 0, function* () {

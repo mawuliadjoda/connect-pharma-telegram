@@ -3,7 +3,7 @@
 require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
-import { convertToFRecimal } from "./Util";
+import { WebAppData, WebAppDataStep, convertToFRecimal } from "./Util";
 import { Location } from "telegraf/typings/core/types/typegram";
 
 
@@ -227,12 +227,7 @@ bot.on(message('text'), async (ctx) => {
     });
 });
 
-type WebAppData = {
-    message: string,
-    email: string,
-    tel: string,
-    hasEmail: boolean
-}
+
 bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
@@ -244,14 +239,29 @@ bot.on('web_app_data', async (ctx) => {
     console.log(data.message);
     console.log(convertToFRecimal(data.email));
 
-    ctx.reply(data.message, {
-        reply_markup: {
-            keyboard: [[{
-                        text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                        web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${convertToFRecimal(data.email)}` }
-                    }]],
-        },
-    });
+    switch (data.step) {
+        case WebAppDataStep.CREATE_ACOUNT:
+
+            ctx.reply(data.message, {
+                reply_markup: {
+                    keyboard: [[{
+                                text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
+                                web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${convertToFRecimal(data.email)}` }
+                            }]],
+                },
+            });
+
+            break;
+        case WebAppDataStep.LOGIN:
+            await ctx.reply(data.message);        
+            ctx.reply(`<b>Veuillez créer votre compte: \n ${data.frontendUrl} !</b>`, { parse_mode: 'HTML' });
+        break;
+    
+        default:
+            break;
+    }
+
+  
 
     // ctx.telegram.sendMessage('33678590574', `Hello ${ctx.state.role}`);
 })

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertToFRecimal = void 0;
+exports.WebAppDataStep = exports.convertToFRecimal = void 0;
 function convertToFRecimal(value) {
     const valueString = String(value);
     if (!(valueString === null || valueString === void 0 ? void 0 : valueString.includes(".")))
@@ -11,4 +11,9 @@ function convertToFRecimal(value) {
     return `${decimalPart},${floatingPart}`;
 }
 exports.convertToFRecimal = convertToFRecimal;
+var WebAppDataStep;
+(function (WebAppDataStep) {
+    WebAppDataStep["CREATE_ACOUNT"] = "CREATE_ACOUNT";
+    WebAppDataStep["LOGIN"] = "LOGIN";
+})(WebAppDataStep || (exports.WebAppDataStep = WebAppDataStep = {}));
 //# sourceMappingURL=Util.js.map
