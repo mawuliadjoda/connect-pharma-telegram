@@ -227,14 +227,22 @@ bot.on(message('text'), async (ctx) => {
     });
 });
 
+type WebAppData = {
+    message: string,
+    email: string,
+    tel: string
+}
 bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
     // await ctx.reply(ctx.message.web_app_data.data);
     // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
 
+    const data: WebAppData = JSON.parse(ctx.message.web_app_data.data);
     
-    ctx.reply(ctx.message.web_app_data.data, {
+    console.log(data.message);
+
+    ctx.reply(data.message, {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",

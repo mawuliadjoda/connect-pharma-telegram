@@ -165,7 +165,9 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(ctx.message.web_app_data.data);
     // await ctx.reply(ctx.message.web_app_data.data);
     // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
-    ctx.reply(ctx.message.web_app_data.data, {
+    const data = JSON.parse(ctx.message.web_app_data.data);
+    console.log(data.message);
+    ctx.reply(data.message, {
         reply_markup: {
             keyboard: [[{
                         text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
