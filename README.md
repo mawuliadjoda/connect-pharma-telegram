@@ -66,3 +66,10 @@ export declare class MemorySessionStore<T> implements SessionStore<T> {
     // set(name: string, value: T): void;
     // delete(name: string): void;
 }
+
+
+# to build add this script to package.json scripts
+"build": "tsc",
+
+# before push to heroku:
+dele "build": "tsc", from package.json
