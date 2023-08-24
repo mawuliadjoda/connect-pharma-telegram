@@ -170,7 +170,7 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     console.log((0, Util_1.convertToFRecimal)(data.email));
     switch (data.step) {
         case Util_1.WebAppDataStep.CREATE_ACOUNT:
-            ctx.reply(data.message, {
+            yield ctx.reply(data.message, {
                 reply_markup: {
                     keyboard: [[{
                                 text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",

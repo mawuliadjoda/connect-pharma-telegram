@@ -242,7 +242,7 @@ bot.on('web_app_data', async (ctx) => {
     switch (data.step) {
         case WebAppDataStep.CREATE_ACOUNT:
 
-            ctx.reply(data.message, {
+            await ctx.reply(data.message, {
                 reply_markup: {
                     keyboard: [[{
                                 text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
