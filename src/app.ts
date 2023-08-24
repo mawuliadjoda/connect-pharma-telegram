@@ -237,8 +237,9 @@ bot.on('web_app_data', async (ctx) => {
     const data: WebAppData = JSON.parse(ctx.message.web_app_data.data);
     
     console.log(data.message);
-    console.log(convertToFRecimal(data.email));
+    console.log(data.email);
 
+    console.log(data.email.replaceAll(`.`, `,`));
     switch (data.step) {
         case WebAppDataStep.CREATE_ACOUNT:
 
