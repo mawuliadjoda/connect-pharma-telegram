@@ -152,7 +152,8 @@ bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0
         telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
     ])));
 }));
-bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
+bot.on((0, filters_1.message)('web_app_data'), (ctx) => __awaiter(void 0, void 0, void 0, function* () {
+    // bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
     // await ctx.reply(ctx.message.web_app_data.data);
@@ -162,6 +163,7 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     const email = data.email;
     console.log(email);
     console.log(email.replaceAll(`.`, `,`));
+    console.log('build ok mawuli');
     switch (data.step) {
         case Util_1.WebAppDataStep.CREATE_ACOUNT:
             yield ctx.reply(data.message, {

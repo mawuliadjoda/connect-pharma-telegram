@@ -211,8 +211,8 @@ bot.on(message('text'), async (ctx) => {
     });
 });
 
-
-bot.on('web_app_data', async (ctx) => {
+bot.on(message('web_app_data'), async (ctx) => {
+// bot.on('web_app_data', async (ctx) => {
     // var [timespamp, timezoneOffset] = ctx.message.web_app_data.data.split('_')
     console.log(ctx.message.web_app_data.data);
     // await ctx.reply(ctx.message.web_app_data.data);
@@ -227,7 +227,8 @@ bot.on('web_app_data', async (ctx) => {
     console.log(email);
     console.log(email.replaceAll(`.`, `,`));
 
-
+    console.log('build ok mawuli');
+    
     switch (data.step) {
         case WebAppDataStep.CREATE_ACOUNT:
 
