@@ -254,7 +254,7 @@ bot.on('web_app_data', async (ctx) => {
             break;
         case WebAppDataStep.LOGIN:
             await ctx.reply(data.message);        
-            ctx.reply(`<b>Veuillez créer votre compte: \n ${data.frontendUrl} !</b>`, { parse_mode: 'HTML' });
+            ctx.reply(`<b>Vous pouvez vous connecter sur ce lien: \n ${data.frontendUrl} </b>`, { parse_mode: 'HTML' });
         break;
     
         default:

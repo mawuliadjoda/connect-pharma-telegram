@@ -181,7 +181,7 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
             break;
         case Util_1.WebAppDataStep.LOGIN:
             yield ctx.reply(data.message);
-            ctx.reply(`<b>Veuillez créer votre compte: \n ${data.frontendUrl} !</b>`, { parse_mode: 'HTML' });
+            ctx.reply(`<b>Vous pouvez vous connecter sur ce lien: \n ${data.frontendUrl} </b>`, { parse_mode: 'HTML' });
             break;
         default:
             break;
