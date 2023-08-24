@@ -3,7 +3,7 @@
 require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
-import { WebAppData, WebAppDataStep, convertToFRecimal } from "./Util";
+import { STEP, SessionData, WebAppData, WebAppDataStep, convertToFRecimal, initSession } from "./Util";
 import { Location } from "telegraf/typings/core/types/typegram";
 
 
@@ -21,23 +21,7 @@ const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV! : TELEGRAM_TOKEN_PROD!;
 
 
-enum STEP {
-    INIT = 'INIT',
-    SHARE_LOCATION = 'SHARE_LOCATION',
-    SHARE_CONTACT = 'SHARE_CONTACT',
-}
 
-interface SessionData {
-    messageCount: number;
-    choice: string;
-    step: STEP,
-    data: {
-        latitude: string,
-        longitude: string,
-        contact: string
-    }
-    // ... more session data go here
-}
 
 // Define your own context type
 interface MyContext extends Context {
@@ -57,12 +41,7 @@ bot.use(session());
 
 
 bot.start(async ctx => {
-    ctx.session = {
-        messageCount: 0,
-        choice: '',
-        step: STEP.INIT,
-        data: { latitude: '', longitude: '', contact: '' }
-    };
+    ctx.session = initSession();
     console.log(`context value: ${ctx.session}`);
 
     await ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
@@ -78,7 +57,11 @@ bot.start(async ctx => {
 
 bot.action("Pharmacies_Proches", ctx => {
 
-    ctx.session.messageCount++;
+    console.log(`session: ${ctx.session}`);
+
+    ctx.session = ctx.session ? ctx.session : initSession();
+
+    ctx.session.messageCount=ctx.session.messageCount++;
     ctx.session.choice = ACTION_NEAREST_PHARMACIES;
     ctx.session.step = STEP.SHARE_LOCATION;
 
@@ -95,6 +78,7 @@ bot.action("Pharmacies_Proches", ctx => {
 });
 
 bot.action("Enregistrer_Pharmacie", ctx => {
+    ctx.session = ctx.session ? ctx.session : initSession();
     ctx.session.messageCount++;
     ctx.session.choice = ACTION_REGISTER_PHARMACY;
     ctx.session.step = STEP.SHARE_LOCATION;
@@ -236,10 +220,14 @@ bot.on('web_app_data', async (ctx) => {
 
     const data: WebAppData = JSON.parse(ctx.message.web_app_data.data);
     
+  
     console.log(data.message);
-    console.log(data.email);
 
-    console.log(data.email.replaceAll(`.`, `,`));
+    const email = data.email;
+    console.log(email);
+    console.log(email.replaceAll(`.`, `,`));
+
+
     switch (data.step) {
         case WebAppDataStep.CREATE_ACOUNT:
 

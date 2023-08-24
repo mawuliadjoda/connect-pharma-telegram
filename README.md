@@ -51,3 +51,18 @@ https://devcenter.heroku.com/articles/deploying-nodejs#build-your-app-and-run-it
 
  # Use Typescript 
  https://www.digitalocean.com/community/tutorials/setting-up-a-node-project-with-typescript
+
+
+
+# update session.d.ts in node_modules
+
+export declare class MemorySessionStore<T> implements SessionStore<T> {
+    private readonly ttl;
+    private readonly store;
+    constructor(ttl?: number);
+    get(name: string): T | undefined;
+    set: (name: string, value: T) => MaybePromise<Any>
+    delete: (name: string) => MaybePromise<Any>
+    // set(name: string, value: T): void;
+    // delete(name: string): void;
+}

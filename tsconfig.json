@@ -5,8 +5,7 @@
       "target": "es6",
       "moduleResolution": "node",
       "sourceMap": true,
-      "outDir": "dist"
+      "outDir": "dist",
+      "lib": ["es2021", "DOM", "DOM.Iterable"],
     },
-    // https://stackoverflow.com/questions/63616486/property-replaceall-does-not-exist-on-type-string
-    "lib": ["es2015", "ES2021.String"]
   }

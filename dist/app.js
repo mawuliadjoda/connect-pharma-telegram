@@ -17,12 +17,6 @@ const Util_1 = require("./Util");
 const { PORT, TELEGRAM_TOKEN_PROD, TELEGRAM_TOKEN_DEV, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK_NEAREST_PHARMACIES, WEB_LINK_REGISTER_PHARMACy, } = process.env;
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
-var STEP;
-(function (STEP) {
-    STEP["INIT"] = "INIT";
-    STEP["SHARE_LOCATION"] = "SHARE_LOCATION";
-    STEP["SHARE_CONTACT"] = "SHARE_CONTACT";
-})(STEP || (STEP = {}));
 if (TELEGRAM_TOKEN === undefined) {
     throw new TypeError("BOT_TOKEN must be provided!");
 }
@@ -31,12 +25,7 @@ const bot = new telegraf_1.Telegraf(TELEGRAM_TOKEN);
 // Make session data available
 bot.use((0, telegraf_1.session)());
 bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
-    ctx.session = {
-        messageCount: 0,
-        choice: '',
-        step: STEP.INIT,
-        data: { latitude: '', longitude: '', contact: '' }
-    };
+    ctx.session = (0, Util_1.initSession)();
     console.log(`context value: ${ctx.session}`);
     yield ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
     return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
@@ -45,9 +34,11 @@ bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     ])));
 }));
 bot.action("Pharmacies_Proches", ctx => {
-    ctx.session.messageCount++;
+    console.log(`session: ${ctx.session}`);
+    ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
+    ctx.session.messageCount = ctx.session.messageCount++;
     ctx.session.choice = ACTION_NEAREST_PHARMACIES;
-    ctx.session.step = STEP.SHARE_LOCATION;
+    ctx.session.step = Util_1.STEP.SHARE_LOCATION;
     return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([
         telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
@@ -55,9 +46,10 @@ bot.action("Pharmacies_Proches", ctx => {
         .resize());
 });
 bot.action("Enregistrer_Pharmacie", ctx => {
+    ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
     ctx.session.messageCount++;
     ctx.session.choice = ACTION_REGISTER_PHARMACY;
-    ctx.session.step = STEP.SHARE_LOCATION;
+    ctx.session.step = Util_1.STEP.SHARE_LOCATION;
     return ctx.reply(MESSAGE_REGISTER_PHARMACY, telegraf_1.Markup.keyboard([
         telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
     ])
@@ -105,7 +97,7 @@ bot.on((0, filters_1.message)("location"), (ctx) => __awaiter(void 0, void 0, vo
     const { latitude, longitude } = ctx.message.location;
     ctx.session.data.latitude = (0, Util_1.convertToFRecimal)(latitude);
     ctx.session.data.longitude = (0, Util_1.convertToFRecimal)(longitude);
-    ctx.session.step = STEP.SHARE_CONTACT;
+    ctx.session.step = Util_1.STEP.SHARE_CONTACT;
     console.log(ctx.session);
     yield ctx.reply(MESSAGE_SEND_CONTACT, telegraf_1.Markup.keyboard([
         telegraf_1.Markup.button.contactRequest("Clickez ici pour envoyer votre numero de tel"),
@@ -151,7 +143,7 @@ bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0
     ctx.session = {
         messageCount: 0,
         choice: '',
-        step: STEP.INIT,
+        step: Util_1.STEP.INIT,
         data: { latitude: '', longitude: '', contact: '' }
     };
     console.log(`web_app_data :${ctx.message}`);
@@ -167,14 +159,16 @@ bot.on('web_app_data', (ctx) => __awaiter(void 0, void 0, void 0, function* () {
     // ctx.reply(`<b>Veuillez créer votre compte: \n https://connect-pharma-911ea.web.app/auth/register !</b>`, { parse_mode: 'HTML' });
     const data = JSON.parse(ctx.message.web_app_data.data);
     console.log(data.message);
-    console.log((0, Util_1.convertToFRecimal)(data.email));
+    const email = data.email;
+    console.log(email);
+    console.log(email.replaceAll(`.`, `,`));
     switch (data.step) {
         case Util_1.WebAppDataStep.CREATE_ACOUNT:
             yield ctx.reply(data.message, {
                 reply_markup: {
                     keyboard: [[{
                                 text: "Clickez ici pour créer un compte dans notre système! \nCeci vous permettra de vous connecter",
-                                web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${(0, Util_1.convertToFRecimal)(data.email)}` }
+                                web_app: { url: `https://connect-pharma-911ea.web.app/auth/register/${ctx.session.data.contact}/${data.email.replaceAll(`.`, `,`)}` }
                             }]],
                 },
             });
