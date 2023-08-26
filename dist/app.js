@@ -59,6 +59,30 @@ bot.action(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
         .oneTime()
         .resize());
 });
+/*   use command  */
+bot.command(PHARMACIE_PROCHE_COMMAND, ctx => {
+    console.log(`session: ${ctx.session}`);
+    ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
+    ctx.session.messageCount = ctx.session.messageCount++;
+    ctx.session.choice = ACTION_NEAREST_PHARMACIES;
+    ctx.session.step = Util_1.STEP.SHARE_LOCATION;
+    return ctx.reply(MESSAGE_SHOW_NEAREST_PHARMACIES, telegraf_1.Markup.keyboard([
+        telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
+    ])
+        .oneTime()
+        .resize());
+});
+bot.command(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
+    ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
+    ctx.session.messageCount++;
+    ctx.session.choice = ACTION_REGISTER_PHARMACY;
+    ctx.session.step = Util_1.STEP.SHARE_LOCATION;
+    return ctx.reply(MESSAGE_REGISTER_PHARMACY, telegraf_1.Markup.keyboard([
+        telegraf_1.Markup.button.locationRequest("Clickez ici pour envoyer votre localisation"),
+    ])
+        .oneTime()
+        .resize());
+});
 /*
 
 bot.start(async ctx => {
