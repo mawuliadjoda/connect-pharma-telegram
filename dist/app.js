@@ -14,6 +14,7 @@ require('dotenv').config();
 const telegraf_1 = require("telegraf");
 const filters_1 = require("telegraf/filters");
 const Util_1 = require("./Util");
+// import { Location } from "telegraf/typings/core/types/typegram";
 const { PORT, TELEGRAM_TOKEN_PROD, TELEGRAM_TOKEN_DEV, SERVER_URL_PROD, SERVER_URL_DEV, ENVIRONMENT, WEB_LINK_NEAREST_PHARMACIES, WEB_LINK_REGISTER_PHARMACy, } = process.env;
 const SERVER_URL = ENVIRONMENT === 'dev' ? SERVER_URL_DEV : SERVER_URL_PROD;
 const TELEGRAM_TOKEN = ENVIRONMENT === 'dev' ? TELEGRAM_TOKEN_DEV : TELEGRAM_TOKEN_PROD;
@@ -24,16 +25,18 @@ if (TELEGRAM_TOKEN === undefined) {
 const bot = new telegraf_1.Telegraf(TELEGRAM_TOKEN);
 // Make session data available
 bot.use((0, telegraf_1.session)());
+const ENREGISTRER_PHARMACIE_COMMAND = "enregistrer_pharmacie";
+const PHARMACIE_PROCHE_COMMAND = "pharmacies_proches";
 bot.start((ctx) => __awaiter(void 0, void 0, void 0, function* () {
     ctx.session = (0, Util_1.initSession)();
     console.log(`context value: ${ctx.session}`);
     yield ctx.reply('<b>Bienvenue sur Connect Pharma !</b>', { parse_mode: 'HTML' });
     return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
-        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", ENREGISTRER_PHARMACIE_COMMAND),
+        telegraf_1.Markup.button.callback("Pharmacies Proches", PHARMACIE_PROCHE_COMMAND),
     ])));
 }));
-bot.action("Pharmacies_Proches", ctx => {
+bot.action(PHARMACIE_PROCHE_COMMAND, ctx => {
     console.log(`session: ${ctx.session}`);
     ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
     ctx.session.messageCount = ctx.session.messageCount++;
@@ -45,7 +48,7 @@ bot.action("Pharmacies_Proches", ctx => {
         .oneTime()
         .resize());
 });
-bot.action("Enregistrer_Pharmacie", ctx => {
+bot.action(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
     ctx.session = ctx.session ? ctx.session : (0, Util_1.initSession)();
     ctx.session.messageCount++;
     ctx.session.choice = ACTION_REGISTER_PHARMACY;
@@ -67,7 +70,7 @@ bot.start(async ctx => {
 
 });
 
-bot.command("Pharmacies_Proches", ctx => {
+bot.command(PHARMACIE_PROCHE_COMMAND, ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
     return ctx.reply(
         MESSAGE_SHOW_NEAREST_PHARMACIES,
@@ -80,7 +83,7 @@ bot.command("Pharmacies_Proches", ctx => {
     )
 })
 
-bot.command("Enregistrer_Pharmacie", ctx => {
+bot.command(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
@@ -148,8 +151,8 @@ bot.on((0, filters_1.message)('text'), (ctx) => __awaiter(void 0, void 0, void 0
     };
     console.log(`web_app_data :${ctx.message}`);
     return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, Object.assign({ parse_mode: "HTML" }, telegraf_1.Markup.inlineKeyboard([
-        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-        telegraf_1.Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+        telegraf_1.Markup.button.callback("Enregistrer Pharmacy", ENREGISTRER_PHARMACIE_COMMAND),
+        telegraf_1.Markup.button.callback("Pharmacies Proches", PHARMACIE_PROCHE_COMMAND),
     ])));
 }));
 bot.on((0, filters_1.message)('web_app_data'), (ctx) => __awaiter(void 0, void 0, void 0, function* () {

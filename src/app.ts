@@ -4,7 +4,7 @@ require('dotenv').config()
 import { Context, session, Telegraf, Markup } from "telegraf";
 import { message } from 'telegraf/filters';
 import { STEP, SessionData, WebAppData, WebAppDataStep, convertToFRecimal, initSession } from "./Util";
-import { Location } from "telegraf/typings/core/types/typegram";
+// import { Location } from "telegraf/typings/core/types/typegram";
 
 
 const { PORT,
@@ -39,6 +39,8 @@ const bot = new Telegraf<MyContext>(TELEGRAM_TOKEN);
 // Make session data available
 bot.use(session());
 
+const ENREGISTRER_PHARMACIE_COMMAND = "enregistrer_pharmacie";
+const PHARMACIE_PROCHE_COMMAND = "pharmacies_proches";
 
 bot.start(async ctx => {
     ctx.session = initSession();
@@ -48,14 +50,14 @@ bot.start(async ctx => {
     return ctx.reply(`\n<i>Bonjour ${ctx.message.from.first_name}, je suis un robot virtuelle qui vous assiste.</i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
         parse_mode: "HTML",
         ...Markup.inlineKeyboard([
-            Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-            Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+            Markup.button.callback("Enregistrer Pharmacy", ENREGISTRER_PHARMACIE_COMMAND),
+            Markup.button.callback("Pharmacies Proches", PHARMACIE_PROCHE_COMMAND),
         ]),
     });
 });
 
 
-bot.action("Pharmacies_Proches", ctx => {
+bot.action(PHARMACIE_PROCHE_COMMAND, ctx => {
 
     console.log(`session: ${ctx.session}`);
 
@@ -77,7 +79,7 @@ bot.action("Pharmacies_Proches", ctx => {
     )
 });
 
-bot.action("Enregistrer_Pharmacie", ctx => {
+bot.action(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
     ctx.session = ctx.session ? ctx.session : initSession();
     ctx.session.messageCount++;
     ctx.session.choice = ACTION_REGISTER_PHARMACY;
@@ -107,7 +109,7 @@ bot.start(async ctx => {
 
 });
 
-bot.command("Pharmacies_Proches", ctx => {
+bot.command(PHARMACIE_PROCHE_COMMAND, ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: NEAREST_PHARMACIES };
     return ctx.reply(
         MESSAGE_SHOW_NEAREST_PHARMACIES,
@@ -120,7 +122,7 @@ bot.command("Pharmacies_Proches", ctx => {
     )
 })
 
-bot.command("Enregistrer_Pharmacie", ctx => {
+bot.command(ENREGISTRER_PHARMACIE_COMMAND, ctx => {
     ctx.session = { messageCount: ctx.session.messageCount++, choice: REGISTER_PHARMACY };
     return ctx.reply(
         MESSAGE_REGISTER_PHARMACY,
@@ -189,6 +191,7 @@ bot.on(message("contact"), async ctx => {
 
 });
 
+
 bot.on(message('text'), async (ctx) => {
     // Explicit usage
     // await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.message.from.first_name}`);
@@ -205,8 +208,8 @@ bot.on(message('text'), async (ctx) => {
     return ctx.reply(`\n<i>Rebonjour ${ctx.message.from.first_name}, </i> \nPour choisir une option, clickez sur un des boutons ci-dessous !`, {
         parse_mode: "HTML",
         ...Markup.inlineKeyboard([
-            Markup.button.callback("Enregistrer Pharmacy", "Enregistrer_Pharmacie"),
-            Markup.button.callback("Pharmacies Proches", "Pharmacies_Proches"),
+            Markup.button.callback("Enregistrer Pharmacy", ENREGISTRER_PHARMACIE_COMMAND),
+            Markup.button.callback("Pharmacies Proches", PHARMACIE_PROCHE_COMMAND),
         ]),
     });
 });
@@ -228,7 +231,7 @@ bot.on(message('web_app_data'), async (ctx) => {
     console.log(email.replaceAll(`.`, `,`));
 
     console.log('build ok mawuli');
-    
+
     switch (data.step) {
         case WebAppDataStep.CREATE_ACOUNT:
 
