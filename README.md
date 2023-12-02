@@ -73,3 +73,11 @@ export declare class MemorySessionStore<T> implements SessionStore<T> {
 
 # before push to heroku:
 dele "build": "tsc", from package.json
+
+
+
+# start webhook 
+
+https://shashwatv.com/telegram-bot-webhook-setup-nodejs-telegraf/
+
+https://api.telegram.org/bot6674210123:AAGtqYo5kTSDuJqcXSmFWUxVyU3JmtcFdVg/setWebhook?url=https://af80-2c0f-f0f8-61c-4c01-fdcb-eb2f-54ff-8379.ngrok-free.app
